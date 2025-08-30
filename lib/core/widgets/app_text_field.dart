@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../theme/app_theme.dart';
 
 class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
@@ -88,63 +89,120 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    // Base decoration from theme
-    final baseDecoration = theme.inputDecorationTheme;
+    final borderRadius = BorderRadius.circular(
+      widget.rounded ? AppTheme.radiusXL : AppTheme.radiusM,
+    );
 
-    // Helper to copy border with new radius
-    OutlineInputBorder? withRadius(InputBorder? border) {
-      if (border is OutlineInputBorder) {
-        return border.copyWith(
-          borderRadius: BorderRadius.circular(widget.rounded ? 24.0 : 8.0),
-        );
-      }
-      return null;
-    }
-
-    return TextFormField(
-      controller: _controller,
-      enabled: widget.enabled ?? true,
-      style: widget.style ?? theme.textTheme.bodyMedium,
-      decoration:
-          InputDecoration(
-                filled: widget.filled,
-                labelText: widget.labelText ?? widget.label,
-                hintText: widget.hintText,
-                helperText: widget.helperText,
-                errorText: widget.errorText,
-                prefixIcon: widget.prefixIcon != null
-                    ? Icon(widget.prefixIcon)
-                    : widget.prefixText,
-                suffixIcon: widget.obscureText
-                    ? GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: Icon(
-                            _obscureText
-                                ? Iconsax.eye_slash_copy
-                                : Iconsax.eye_copy,
-                          ),
-                        ),
-                      )
-                    : null,
-              )
-              .applyDefaults(baseDecoration)
-              .copyWith(
-                border: withRadius(baseDecoration.border),
-                enabledBorder: withRadius(baseDecoration.enabledBorder),
-                focusedBorder: withRadius(baseDecoration.focusedBorder),
-                errorBorder: withRadius(baseDecoration.errorBorder),
-                focusedErrorBorder: withRadius(
-                  baseDecoration.focusedErrorBorder,
-                ),
-              ),
-      obscureText: _obscureText,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: _controller,
+        enabled: widget.enabled ?? true,
+        style: widget.style ?? theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: widget.filled 
+              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              : colorScheme.surface,
+          labelText: widget.labelText ?? widget.label,
+          labelStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w500,
+          ),
+          hintText: widget.hintText,
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          helperText: widget.helperText,
+          errorText: widget.errorText,
+          prefixIcon: widget.prefixIcon != null
+              ? Container(
+                  margin: const EdgeInsets.only(
+                    left: AppTheme.spacingM,
+                    right: AppTheme.spacingS,
+                  ),
+                  child: Icon(
+                    widget.prefixIcon,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    size: 20,
+                  ),
+                )
+              : widget.prefixText,
+          suffixIcon: widget.obscureText
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(
+                      right: AppTheme.spacingM,
+                    ),
+                    child: Icon(
+                      _obscureText
+                          ? Iconsax.eye_slash_copy
+                          : Iconsax.eye_copy,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                      size: 20,
+                    ),
+                  ),
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: colorScheme.error,
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: colorScheme.error,
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+             horizontal: AppTheme.spacingL,
+             vertical: AppTheme.spacingM,
+           ),
+         ),
+         obscureText: _obscureText,
       validator: widget.validator,
       onChanged: widget.onChanged,
       onSaved: widget.onSaved,
@@ -179,6 +237,7 @@ class _AppTextFieldState extends State<AppTextField> {
       textInputAction: widget.textInputAction,
       minLines: widget.minLines,
       maxLines: widget.maxLines ?? 1,
+      ),
     );
   }
 }

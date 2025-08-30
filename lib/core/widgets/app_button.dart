@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 /// A custom button widget that supports various styles,
 /// loading states, and icon alignments.
@@ -63,16 +64,18 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final effectiveOnPressed = (isDisabled || loading) ? null : onPressed;
-    final defaultColor = Theme.of(context).colorScheme.primary;
+    final defaultColor = colorScheme.primary;
 
     final buttonContent = loading
-        ? const SizedBox(
+        ? SizedBox(
             height: 20,
             width: 20,
             child: CircularProgressIndicator(
               strokeWidth: 3.0,
-              color: Colors.white,
+              color: isOutlined ? defaultColor : Colors.white,
             ),
           )
         : Row(
@@ -81,54 +84,96 @@ class AppButton extends StatelessWidget {
             children: [
               if (icon != null && iconAlignment == MainAxisAlignment.start) ...[
                 icon!,
-                const SizedBox(width: 8.0),
+                const SizedBox(width: AppTheme.spacingS),
               ],
               if (label != null)
                 Text(
                   label!,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: textColor ?? Theme.of(context).colorScheme.onPrimary,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: textColor ?? (isOutlined ? defaultColor : colorScheme.onPrimary),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               if (icon != null && iconAlignment == MainAxisAlignment.end) ...[
-                const SizedBox(width: 8.0),
+                const SizedBox(width: AppTheme.spacingS),
                 icon!,
               ],
             ],
           );
 
-    final buttonStyle = isOutlined
-        ? OutlinedButton.styleFrom(
-            foregroundColor: textColor,
-            side: BorderSide(color: textColor ?? defaultColor),
+    if (isOutlined) {
+      return SizedBox(
+        width: width,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: textColor ?? defaultColor,
+            side: BorderSide(
+              color: textColor ?? defaultColor,
+              width: 1.5,
+            ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(rounded ? 24.0 : 8.0),
+              borderRadius: BorderRadius.circular(
+                rounded ? AppTheme.radiusXL : AppTheme.radiusM,
+              ),
             ),
             elevation: 0,
-            minimumSize: Size(width ?? (expanded ? double.infinity : 0), 48.0),
-          )
-        : ElevatedButton.styleFrom(
-            backgroundColor: color ?? defaultColor,
-            foregroundColor: textColor,
-            elevation: elevation,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(rounded ? 24.0 : 8.0),
+            minimumSize: Size(
+              width ?? (expanded ? double.infinity : 0),
+              52.0,
             ),
-            minimumSize: Size(width ?? (expanded ? double.infinity : 0), 48.0),
-          );
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingL,
+              vertical: AppTheme.spacingM,
+            ),
+          ),
+          onPressed: effectiveOnPressed,
+          child: buttonContent,
+        ),
+      );
+    }
 
-    final button = isOutlined
-        ? OutlinedButton(
-            style: buttonStyle,
-            onPressed: effectiveOnPressed,
-            child: buttonContent,
-          )
-        : ElevatedButton(
-            style: buttonStyle,
-            onPressed: effectiveOnPressed,
-            child: buttonContent,
-          );
-
-    return SizedBox(width: width, child: button);
+    // Primary button with gradient and shadow
+    return SizedBox(
+      width: width,
+      child: Container(
+        height: 52.0,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color ?? defaultColor,
+              (color ?? defaultColor).withValues(alpha: 0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(
+            rounded ? AppTheme.radiusXL : AppTheme.radiusM,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (color ?? defaultColor).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: effectiveOnPressed,
+            borderRadius: BorderRadius.circular(
+              rounded ? AppTheme.radiusXL : AppTheme.radiusM,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingL,
+                vertical: AppTheme.spacingM,
+              ),
+              child: Center(child: buttonContent),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

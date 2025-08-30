@@ -11,12 +11,10 @@ abstract class AppException implements Exception {
 
 /// Thrown when network call fails
 class NetworkException extends AppException {
-  const NetworkException(String message, {String? details})
-      : super(message, details: details);
+  const NetworkException(super.message, {super.details});
 }
 
 /// Thrown when parsing / mapping fails
 class ParsingException extends AppException {
-  const ParsingException(String message, {String? details})
-      : super(message, details: details);
+  const ParsingException(super.message, {super.details});
 }

@@ -27,7 +27,7 @@ class MyApp extends ConsumerWidget {
         title: 'FDD Demo',
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        initialRoute: Routes.home,
+        initialRoute: Routes.login,
         routes: Routes.getRoutes(),
       ),
     );

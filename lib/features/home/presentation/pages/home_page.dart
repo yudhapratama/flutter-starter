@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../profile/presentation/providers/shop_profile_provider.dart';
+import '../../../profile/presentation/widgets/statistics_card.dart';
 import '../../../../core/widgets/app_button.dart';
 
 class HomePage extends ConsumerWidget {
@@ -17,81 +19,82 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(title: const Text("Home")),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              SizedBox(
-                width: 100,
-                height: 100,
-                child: Icon(
-                  Iconsax.home_copy,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-              const SizedBox(height: 24),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
               if (auth.user == null) ...[
                 Text("Welcome Guest!", style: textTheme.bodyLarge),
                 const SizedBox(height: 16),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    child: AppButton(
-                      label: "Login",
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/login");
-                      },
-                    ),
-                  ),
+                AppButton(
+                  label: "Login",
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/login");
+                  },
                 ),
               ] else ...[
+                // Statistics Card
+                Consumer(
+                  builder: (context, ref, child) {
+                    final shopState = ref.watch(shopProfileNotifierProvider);
+                    
+                    if (shopState.isLoading) {
+                      return const StatisticsCard(isLoading: true);
+                    } else if (shopState.error != null) {
+                      return const SizedBox.shrink();
+                    } else if (shopState.shop != null) {
+                      final shop = shopState.shop!;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0),
+                        child: StatisticsCard(
+                          totalProducts: shop.totalProducts,
+                          totalOrders: shop.totalOrders,
+                          totalReviews: shop.totalReviews,
+                          rating: shop.rating,
+                          revenue: shop.revenue,
+                          activeProducts: shop.totalProducts,
+                          pendingOrders: 0, // TODO: Add pending orders calculation
+                        ),
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
                 Text("Welcome, ${auth.user!.name}", style: textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 Text("Dashboard Seller Pasar Al Huda", style: textTheme.titleMedium),
                 const SizedBox(height: 32),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    child: AppButton(
-                      label: "Kelola Produk",
-                      icon: const Icon(Iconsax.box),
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/products");
-                      },
-                    ),
-                  ),
+                AppButton(
+                  label: "Kelola Produk",
+                  icon: const Icon(Iconsax.box),
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/products");
+                  },
                 ),
                 const SizedBox(height: 12),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    child: AppButton(
-                      label: "Profile",
-                      icon: const Icon(Iconsax.user),
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/profile");
-                      },
-                    ),
-                  ),
+                AppButton(
+                  label: "Profile",
+                  icon: const Icon(Iconsax.user),
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/profile");
+                  },
                 ),
                 const SizedBox(height: 12),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    child: AppButton(
-                      label: "Logout",
-                      icon: const Icon(Iconsax.logout),
-                      onPressed: () {
-                        authNotifier.logout();
-                      },
-                    ),
-                  ),
+                AppButton(
+                  label: "Logout",
+                  icon: const Icon(Iconsax.logout),
+                  onPressed: () {
+                    authNotifier.logout();
+                  },
                 ),
               ],
               const SizedBox(height: 40),
             ],
+            ),
           ),
         ),
       ),
